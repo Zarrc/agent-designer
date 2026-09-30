@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "agent-designer",
+  "version": "1.0.0",
+  "description": "设计 agent 的 agent —— 准入闸门 + 联网调研 + 校验回环",
+  "owner": {
+    "name": "Zarrc"
+  },
+  "plugins": [
+    {
+      "name": "agent-designer",
+      "source": "./plugins/agent-designer",
+      "description": "先判定该不该建 agent，再联网调研同类实现并核实，按房子风格产出 .claude/agents/*.md，最后用校验回环自检、不过回炉。补上官方 agent-creator 缺失的验证环节。",
+      "category": "development"
+    }
+  ]
+}

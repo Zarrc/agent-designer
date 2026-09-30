@@ -1,0 +1,8 @@
+{
+  "name": "agent-designer",
+  "version": "1.0.0",
+  "description": "设计 agent 的 agent：准入闸门 → 需求澄清 → 联网调研 → 按房子风格设计 → 校验回炉。补上官方 agent-creator 缺失的验证环节。",
+  "author": {
+    "name": "Zarrc"
+  }
+}
