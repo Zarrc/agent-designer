@@ -14,7 +14,7 @@
 | `name` | 身份**只由它决定**，文件名不参与判定。**不能含 `:`**（预留给 `my-plugin:reviewer` 这类插件作用域 ID），v2.1.218 起含 `:` 的名字直接被拒绝并记日志 |
 | `description` | 何时该派这个 agent —— 即**路由信号** |
 
-### 可选（17 项）
+### 可选（16 项）
 
 | 字段 | 说明 |
 |------|------|
@@ -34,6 +34,10 @@
 | `color` | `red` `blue` `green` `yellow` `purple` `orange` `pink` `cyan` |
 | `initialPrompt` | 作为主会话 agent 时自动提交的首个用户轮 |
 | `experimental` | 实验项 map，如 `cacheTtl: 5m` / `1h` |
+
+> ⚠️ **插件里的 subagent 有三个字段不生效**：`hooks`、`mcpServers`、`permissionMode` —— 从插件加载时**被忽略**。若要这三个，必须装到 `.claude/agents/` 或 `~/.claude/agents/`。
+>
+> ⚠️ **部分字段有版本门槛**（`name` 含 `:` 的拒绝、`omitClaudeMd`、`experimental`、`manual` 别名等）。**升级或排错时以官方文档为准**，别照抄二手版本号。
 
 ### `model` 解析优先级
 
@@ -69,27 +73,34 @@ Managed settings > `--agents` CLI flag > `.claude/agents/` > `~/.claude/agents/`
 | `agent` | No | `context: fork` 时用哪个子代理类型（默认 `general-purpose`） |
 | `background` | No | 仅 `context: fork` 生效，默认 `true` |
 | `hooks` / `paths` / `shell` | No | 钩子 / 路径 glob 限定自动激活 / `bash`\|`powershell` |
-| `metadata` / `license` / `compatibility` | No | 后两者属 Agent Skills 规范，Claude Code 接受但不作用 |
+| `metadata` / `license` / `compatibility` | No | 三者均属 **Agent Skills 规范**（跨工具兼容子集），Claude Code 接受但不作用 |
 
 布尔值自 v2.1.218 起接受 `yes/no/on/off/1/0`（任意大小写）。
 
 ### 跨工具兼容子集
 
-上传到 claude.ai / Skills API / 经 `package_skill.py` 打包时，**只认**：
+上传到 claude.ai / Skills API / 经 `package_skill.py` 打包时，**只认这六个**：
 `name`、`description`、`license`、`compatibility`、`metadata`、`allowed-tools`。
 其余字段会报错，例如：`Unexpected key(s) in SKILL.md frontmatter: argument-hint.`
 
 ---
 
-## 三、静默失败陷阱（全部来自官方文档，**不会报错**）
+## 三、静默失败陷阱
 
-| 陷阱 | 后果 |
+### 4 项**不报错**的（最危险）
+
+| 检查 | 后果 |
 |------|------|
-| subagent frontmatter 字段名拼错 / 大小写错 | **静默忽略，不报错**，行为莫名降级 |
-| `SKILL.md` 的 `---` 不是**文件第一行** | 整个文件（含 `---`）被当成 skill 正文 |
-| `SKILL.md` 的 YAML 解析失败 | skill 仍加载，但**所有字段为空** |
-| `description` + `when_to_use` 超 1,536 字符 | 在 listing 中被**截断** → 路由依据丢失 |
-| `name` 含 `:` | v2.1.218 起**直接被拒绝** |
+| subagent frontmatter 字段名拼错 / 大小写错（是 `maxTurns` 不是 `maxturns`） | **静默忽略，不报错**，行为莫名降级 |
+| `SKILL.md` 的第一行是不是 `---` | 否则整个文件（含 `---`）被当成 skill 正文 |
+| `SKILL.md` 里的 YAML 能否解析 | 解析失败 → skill 仍加载，但**所有字段为空** |
+| `description` + `when_to_use` 是否超 1,536 字符 | 超了在 listing 中**被截断** → 路由依据丢失 |
+
+### 1 项**会硬拒绝**的（会报错，但仍列在此便于一起查）
+
+| 检查 | 后果 |
+|------|------|
+| `name` 是否含 `:` | v2.1.218 起**直接被拒绝**（`:` 预留给插件作用域 ID） |
 
 ---
 
